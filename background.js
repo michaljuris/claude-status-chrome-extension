@@ -1,6 +1,6 @@
 const CLAUDE_CODE_ID = 'yyzkbfz2thpt';
 const API_BASE = 'https://status.claude.com/api/v2';
-const POLL_INTERVAL_MINUTES = 0.5; // 30 seconds
+const POLL_INTERVAL_MINUTES = 0.5; // 30 seconds (clamped to 1 min for published extensions)
 
 const STATUS_SEVERITY = {
   operational: 0,
@@ -10,6 +10,7 @@ const STATUS_SEVERITY = {
 };
 
 // Organic spark rays — angles and relative lengths (0-1 scale)
+// Keep in sync with popup.js
 const SPARK_RAYS = [
   { angle: -90, length: 1.0 },
   { angle: -53, length: 0.72 },
@@ -126,18 +127,23 @@ function buildSevenDayHistory(allIncidents) {
   }
 
   for (const incident of allIncidents) {
-    const startDate = new Date(incident.started_at).toISOString().slice(0, 10);
     const affectsClaude = (incident.components || []).some((c) => c.id === CLAUDE_CODE_ID);
     if (!affectsClaude) continue;
 
-    const dayEntry = days.find((d) => d.date === startDate);
-    if (!dayEntry) continue;
-
-    dayEntry.incidents.push(incident.name);
+    const startDate = new Date(incident.started_at).toISOString().slice(0, 10);
+    const endDate = incident.resolved_at
+      ? new Date(incident.resolved_at).toISOString().slice(0, 10)
+      : now.toISOString().slice(0, 10);
 
     const worstStatus = getWorstStatusFromIncident(incident);
-    if (STATUS_SEVERITY[worstStatus] > STATUS_SEVERITY[dayEntry.status]) {
-      dayEntry.status = worstStatus;
+
+    for (const dayEntry of days) {
+      if (dayEntry.date >= startDate && dayEntry.date <= endDate) {
+        dayEntry.incidents.push(incident.name);
+        if (STATUS_SEVERITY[worstStatus] > STATUS_SEVERITY[dayEntry.status]) {
+          dayEntry.status = worstStatus;
+        }
+      }
     }
   }
 
@@ -148,6 +154,7 @@ function getWorstStatusFromIncident(incident) {
   let worst = 'operational';
   for (const update of incident.incident_updates || []) {
     for (const comp of update.affected_components || []) {
+      // affected_components use 'code' field (same value as component 'id')
       if (comp.code === CLAUDE_CODE_ID) {
         if (STATUS_SEVERITY[comp.new_status] > STATUS_SEVERITY[worst]) {
           worst = comp.new_status;

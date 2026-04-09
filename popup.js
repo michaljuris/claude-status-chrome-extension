@@ -19,6 +19,7 @@ const STATUS_LABELS = {
   major_outage: 'Major Outage',
 };
 
+// Keep in sync with background.js
 const SPARK_RAYS = [
   { angle: -90, length: 1.0 },
   { angle: -53, length: 0.72 },
@@ -97,7 +98,9 @@ function renderStatusBar(days) {
     tooltip.className = 'day-tooltip';
     const dateLabel = formatDate(day.date);
     if (day.incidents.length > 0) {
-      tooltip.textContent = `${dateLabel}: ${day.incidents[0]}`;
+      tooltip.textContent = day.incidents.length === 1
+        ? `${dateLabel}: ${day.incidents[0]}`
+        : `${dateLabel}: ${day.incidents.length} incidents`;
     } else {
       tooltip.textContent = `${dateLabel}: No incidents`;
     }
