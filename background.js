@@ -26,10 +26,10 @@ const SPARK_RAYS = [
 ];
 
 const STATUS_COLORS = {
-  operational: '#4ade80',
-  degraded_performance: '#facc15',
-  partial_outage: '#f97316',
-  major_outage: '#ef4444',
+  operational: '#76AD2A',
+  degraded_performance: '#E86235',
+  partial_outage: '#E86235',
+  major_outage: '#E04343',
 };
 
 async function updateIcon(status) {

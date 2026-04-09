@@ -12,6 +12,14 @@ const STATUS_COLORS_DARK = {
   major_outage: '#ef4444',
 };
 
+// Exact colors from status.claude.com bar segments
+const BAR_COLORS = {
+  operational: '#76AD2A',
+  degraded_performance: '#E86235',
+  partial_outage: '#E86235',
+  major_outage: '#E04343',
+};
+
 const STATUS_LABELS = {
   operational: 'Operational',
   degraded_performance: 'Degraded Performance',
@@ -92,7 +100,7 @@ function renderStatusBar(days) {
   for (const day of days) {
     const el = document.createElement('div');
     el.className = 'status-bar-day';
-    el.style.backgroundColor = getStatusColor(day.status);
+    el.style.backgroundColor = BAR_COLORS[day.status] || BAR_COLORS.operational;
 
     const tooltip = document.createElement('div');
     tooltip.className = 'day-tooltip';
