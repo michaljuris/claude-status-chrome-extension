@@ -1,15 +1,15 @@
 const STATUS_COLORS_LIGHT = {
-  operational: '#22c55e',
-  degraded_performance: '#eab308',
-  partial_outage: '#f97316',
-  major_outage: '#ef4444',
+  operational: '#76AD2A',
+  degraded_performance: '#D4A017',
+  partial_outage: '#E86235',
+  major_outage: '#E04343',
 };
 
 const STATUS_COLORS_DARK = {
-  operational: '#4ade80',
-  degraded_performance: '#facc15',
-  partial_outage: '#f97316',
-  major_outage: '#ef4444',
+  operational: '#76AD2A',
+  degraded_performance: '#D4A017',
+  partial_outage: '#E86235',
+  major_outage: '#E04343',
 };
 
 // Exact colors from status.claude.com bar segments
