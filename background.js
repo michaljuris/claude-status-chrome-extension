@@ -127,15 +127,14 @@ function buildSevenDayHistory(allIncidents) {
   }
 
   for (const incident of allIncidents) {
-    const affectsClaude = (incident.components || []).some((c) => c.id === CLAUDE_CODE_ID);
-    if (!affectsClaude) continue;
+    // Only include incidents where Claude Code's status specifically changed
+    const worstStatus = getWorstStatusFromIncident(incident);
+    if (worstStatus === 'operational') continue;
 
     const startDate = new Date(incident.started_at).toISOString().slice(0, 10);
     const endDate = incident.resolved_at
       ? new Date(incident.resolved_at).toISOString().slice(0, 10)
       : now.toISOString().slice(0, 10);
-
-    const worstStatus = getWorstStatusFromIncident(incident);
 
     for (const dayEntry of days) {
       if (dayEntry.date >= startDate && dayEntry.date <= endDate) {
@@ -173,7 +172,7 @@ function getRecentIncidents(allIncidents) {
     .filter((incident) => {
       const started = new Date(incident.started_at);
       if (started < sevenDaysAgo) return false;
-      return (incident.components || []).some((c) => c.id === CLAUDE_CODE_ID);
+      return getWorstStatusFromIncident(incident) !== 'operational';
     })
     .map((incident) => ({
       name: incident.name,
