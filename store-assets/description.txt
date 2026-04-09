@@ -1,0 +1,27 @@
+SHORT DESCRIPTION (132 chars max):
+Shows Claude Code service status in your browser toolbar. See outages, incidents, and 7-day history at a glance.
+
+---
+
+DETAILED DESCRIPTION:
+
+Keep an eye on Claude Code's health without leaving your browser.
+
+This extension puts a live status indicator in your Chrome toolbar — a colored spark icon that turns green, orange, or red based on Claude Code's current status. Hover to see the status text, click to see the full picture.
+
+WHAT YOU GET:
+- Live status icon in the toolbar that updates every 30 seconds
+- 7-day history bar showing daily uptime with outage durations on hover
+- Current status of all Claude services (claude.ai, API, platform, Cowork, Government)
+- Recent incident summaries with timestamps and resolution status
+- Light and dark theme support (follows your system setting)
+
+HOW IT WORKS:
+The extension polls Anthropic's public status page API (status.claude.com) for real-time data. All processing happens locally in your browser. No accounts, no sign-ups, no data collection.
+
+PERMISSIONS:
+- Alarms: periodic status checks
+- Storage: cache status data locally
+- Host access: status.claude.com only
+
+This extension is not affiliated with Anthropic.

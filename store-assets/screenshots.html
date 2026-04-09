@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chrome Web Store Screenshots</title>
+<style>
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    padding: 40px;
+  }
+  h2 { color: #333; margin-bottom: 8px; }
+  p.note { color: #888; font-size: 13px; margin-bottom: 16px; }
+
+  /* Each screenshot frame is 1280x800 */
+  .screenshot {
+    width: 1280px;
+    height: 800px;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+  }
+
+  /* Mock popup */
+  .popup {
+    width: 340px;
+    border-radius: 8px;
+    font-size: 13px;
+    overflow: hidden;
+  }
+  .popup-light {
+    background: #ffffff;
+    color: #1a1a1a;
+    border: 1px solid #e0e0e0;
+  }
+  .popup-dark {
+    background: #1c1c1c;
+    color: #e0e0e0;
+    border: 1px solid #333;
+  }
+
+  .popup .header {
+    padding: 14px 16px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .popup-light .header { border-bottom: 1px solid #eee; }
+  .popup-dark .header { border-bottom: 1px solid #2a2a2a; }
+
+  .header-title { font-weight: 600; font-size: 14px; }
+  .header-status { margin-left: auto; font-size: 12px; }
+
+  .status-bar-section { padding: 12px 16px; }
+  .status-bar { display: flex; gap: 2px; height: 20px; }
+  .status-bar div { flex: 1; border-radius: 2px; }
+
+  .bar-labels { display: flex; justify-content: space-between; margin-top: 4px; font-size: 10px; }
+  .popup-light .bar-labels { color: #999; }
+  .popup-dark .bar-labels { color: #666; }
+
+  .services {
+    padding: 8px 16px 10px;
+  }
+  .popup-light .services { border-top: 1px solid #eee; }
+  .popup-dark .services { border-top: 1px solid #2a2a2a; }
+
+  .service-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    font-size: 12px;
+  }
+  .popup-light .service-name { color: #666; }
+  .popup-dark .service-name { color: #999; }
+
+  .incidents {
+    padding: 8px 16px 12px;
+  }
+  .popup-light .incidents { border-top: 1px solid #eee; }
+  .popup-dark .incidents { border-top: 1px solid #2a2a2a; }
+
+  .incident-name { font-size: 12px; font-weight: 500; }
+  .incident-meta { font-size: 11px; margin-top: 2px; }
+  .popup-light .incident-meta { color: #999; }
+  .popup-dark .incident-meta { color: #666; }
+
+  .footer {
+    padding: 8px 16px;
+    text-align: center;
+  }
+  .popup-light .footer { border-top: 1px solid #eee; }
+  .popup-dark .footer { border-top: 1px solid #2a2a2a; }
+  .footer a { font-size: 11px; text-decoration: none; }
+  .popup-light .footer a { color: #6366f1; }
+  .popup-dark .footer a { color: #818cf8; }
+
+  /* Callout labels */
+  .callout {
+    position: absolute;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.4;
+    max-width: 280px;
+  }
+  .callout-light { color: #333; }
+  .callout-dark { color: #e0e0e0; }
+</style>
+</head>
+<body>
+
+<h2>Screenshot 1: Light theme — overview</h2>
+<p class="note">1280x800 — open this page in Chrome and use DevTools to screenshot each .screenshot div, or use Cmd+Shift+4</p>
+
+<div class="screenshot" style="background: linear-gradient(135deg, #f8faf5 0%, #f0f4eb 100%);">
+  <!-- Callout labels -->
+  <div class="callout callout-light" style="top: 80px; left: 100px;">
+    <div style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">Claude Code Status</div>
+    <div style="font-size: 16px; color: #666; font-weight: 400;">Live service status in your<br>Chrome toolbar</div>
+  </div>
+
+  <div class="callout callout-light" style="top: 260px; left: 100px; font-size: 13px; color: #888;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <svg width="14" height="14" viewBox="0 0 28 28"><g transform="translate(14,14)"><line x1="0" y1="0" x2="0" y2="-12" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="6" y2="-8" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="10" y2="-5" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="11" y2="1.5" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="8" y2="7" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="4" y2="11" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="-2" y2="10" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="-7" y2="8" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="-11" y2="3" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="-10" y2="-4" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="-6" y2="-9" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/></g></svg>
+      <span>Color-coded toolbar icon</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <span style="color:#76AD2A;">&#9632;</span> 7-day uptime history
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <span style="color:#76AD2A;">&#9679;</span> All Claude services at a glance
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="color:#E86235;">&#9679;</span> Active incident alerts
+    </div>
+  </div>
+
+  <!-- Popup -->
+  <div class="popup popup-light" style="position: absolute; right: 160px; top: 100px;">
+    <div class="header">
+      <svg width="16" height="16" viewBox="0 0 28 28"><g transform="translate(14,14)"><line x1="0" y1="0" x2="0" y2="-12" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="6" y2="-8" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="10" y2="-5" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="11" y2="1.5" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="8" y2="7" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="4" y2="11" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="-2" y2="10" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="-7" y2="8" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="-11" y2="3" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="-10" y2="-4" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="-6" y2="-9" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/></g></svg>
+      <span class="header-title">Claude Code</span>
+      <span class="header-status" style="color:#76AD2A;">&#9679; Operational</span>
+    </div>
+    <div class="status-bar-section">
+      <div class="status-bar">
+        <div style="background:#76AD2A;"></div>
+        <div style="background:#76AD2A;"></div>
+        <div style="background:#E86235;"></div>
+        <div style="background:#76AD2A;"></div>
+        <div style="background:#E04343;"></div>
+        <div style="background:#E86235;"></div>
+        <div style="background:#76AD2A;"></div>
+      </div>
+      <div class="bar-labels"><span>Apr 3</span><span>Apr 9</span></div>
+    </div>
+    <div class="services">
+      <div class="service-row"><span class="service-name">claude.ai</span><span style="color:#76AD2A;">&#9679;</span></div>
+      <div class="service-row"><span class="service-name">Claude API (api.anthropic.com)</span><span style="color:#76AD2A;">&#9679;</span></div>
+      <div class="service-row"><span class="service-name">platform.claude.com</span><span style="color:#76AD2A;">&#9679;</span></div>
+      <div class="service-row"><span class="service-name">Claude Cowork</span><span style="color:#76AD2A;">&#9679;</span></div>
+      <div class="service-row"><span class="service-name">Claude for Government</span><span style="color:#76AD2A;">&#9679;</span></div>
+    </div>
+    <div class="incidents">
+      <div>
+        <div class="incident-name">Sonnet 4.6 elevated rate of errors</div>
+        <div class="incident-meta">Apr 9 &middot; 08:07&ndash;08:53 UTC <span style="color:#999;">&middot; Resolved</span></div>
+      </div>
+    </div>
+    <div class="footer">
+      <a href="#">status.claude.com &#8599;</a>
+    </div>
+  </div>
+</div>
+
+<h2>Screenshot 2: Dark theme</h2>
+
+<div class="screenshot" style="background: linear-gradient(135deg, #1a1a2e 0%, #16161a 100%);">
+  <div class="callout callout-dark" style="top: 80px; left: 100px;">
+    <div style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">Dark mode support</div>
+    <div style="font-size: 16px; color: #999; font-weight: 400;">Follows your system theme<br>automatically</div>
+  </div>
+
+  <div class="popup popup-dark" style="position: absolute; right: 160px; top: 100px;">
+    <div class="header">
+      <svg width="16" height="16" viewBox="0 0 28 28"><g transform="translate(14,14)"><line x1="0" y1="0" x2="0" y2="-12" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="6" y2="-8" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="10" y2="-5" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="11" y2="1.5" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="8" y2="7" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="4" y2="11" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="-2" y2="10" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="-7" y2="8" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="-11" y2="3" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="-10" y2="-4" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/><line x1="0" y1="0" x2="-6" y2="-9" stroke="#76AD2A" stroke-width="2.8" stroke-linecap="round"/></g></svg>
+      <span class="header-title">Claude Code</span>
+      <span class="header-status" style="color:#76AD2A;">&#9679; Operational</span>
+    </div>
+    <div class="status-bar-section">
+      <div class="status-bar">
+        <div style="background:#76AD2A;"></div>
+        <div style="background:#76AD2A;"></div>
+        <div style="background:#E86235;"></div>
+        <div style="background:#76AD2A;"></div>
+        <div style="background:#E04343;"></div>
+        <div style="background:#E86235;"></div>
+        <div style="background:#76AD2A;"></div>
+      </div>
+      <div class="bar-labels"><span>Apr 3</span><span>Apr 9</span></div>
+    </div>
+    <div class="services">
+      <div class="service-row"><span class="service-name">claude.ai</span><span style="color:#76AD2A;">&#9679;</span></div>
+      <div class="service-row"><span class="service-name">Claude API (api.anthropic.com)</span><span style="color:#76AD2A;">&#9679;</span></div>
+      <div class="service-row"><span class="service-name">platform.claude.com</span><span style="color:#76AD2A;">&#9679;</span></div>
+      <div class="service-row"><span class="service-name">Claude Cowork</span><span style="color:#76AD2A;">&#9679;</span></div>
+      <div class="service-row"><span class="service-name">Claude for Government</span><span style="color:#76AD2A;">&#9679;</span></div>
+    </div>
+    <div class="incidents">
+      <div>
+        <div class="incident-name">Sonnet 4.6 elevated rate of errors</div>
+        <div class="incident-meta">Apr 9 &middot; 08:07&ndash;08:53 UTC <span style="color:#666;">&middot; Resolved</span></div>
+      </div>
+    </div>
+    <div class="footer">
+      <a href="#">status.claude.com &#8599;</a>
+    </div>
+  </div>
+</div>
+
+<h2>Screenshot 3: Icon states</h2>
+
+<div class="screenshot" style="background: linear-gradient(135deg, #f8faf5 0%, #f0f4eb 100%);">
+  <div style="text-align:center;">
+    <div style="font-size: 24px; font-weight: 700; color: #333; margin-bottom: 32px;">Status at a glance</div>
+    <div style="display:flex;gap:80px;align-items:flex-start;justify-content:center;">
+      <div style="text-align:center;">
+        <svg width="64" height="64" viewBox="0 0 28 28"><g transform="translate(14,14)"><line x1="0" y1="0" x2="0" y2="-12" stroke="#76AD2A" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="6" y2="-8" stroke="#76AD2A" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="10" y2="-5" stroke="#76AD2A" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="11" y2="1.5" stroke="#76AD2A" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="8" y2="7" stroke="#76AD2A" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="4" y2="11" stroke="#76AD2A" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-2" y2="10" stroke="#76AD2A" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-7" y2="8" stroke="#76AD2A" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-11" y2="3" stroke="#76AD2A" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-10" y2="-4" stroke="#76AD2A" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-6" y2="-9" stroke="#76AD2A" stroke-width="2.4" stroke-linecap="round"/></g></svg>
+        <div style="color:#76AD2A;font-weight:600;margin-top:8px;">Operational</div>
+      </div>
+      <div style="text-align:center;">
+        <svg width="64" height="64" viewBox="0 0 28 28"><g transform="translate(14,14)"><line x1="0" y1="0" x2="0" y2="-12" stroke="#D4A017" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="6" y2="-8" stroke="#D4A017" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="10" y2="-5" stroke="#D4A017" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="11" y2="1.5" stroke="#D4A017" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="8" y2="7" stroke="#D4A017" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="4" y2="11" stroke="#D4A017" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-2" y2="10" stroke="#D4A017" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-7" y2="8" stroke="#D4A017" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-11" y2="3" stroke="#D4A017" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-10" y2="-4" stroke="#D4A017" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-6" y2="-9" stroke="#D4A017" stroke-width="2.4" stroke-linecap="round"/></g></svg>
+        <div style="color:#D4A017;font-weight:600;margin-top:8px;">Degraded</div>
+      </div>
+      <div style="text-align:center;">
+        <svg width="64" height="64" viewBox="0 0 28 28"><g transform="translate(14,14)"><line x1="0" y1="0" x2="0" y2="-12" stroke="#E86235" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="6" y2="-8" stroke="#E86235" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="10" y2="-5" stroke="#E86235" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="11" y2="1.5" stroke="#E86235" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="8" y2="7" stroke="#E86235" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="4" y2="11" stroke="#E86235" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-2" y2="10" stroke="#E86235" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-7" y2="8" stroke="#E86235" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-11" y2="3" stroke="#E86235" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-10" y2="-4" stroke="#E86235" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-6" y2="-9" stroke="#E86235" stroke-width="2.4" stroke-linecap="round"/></g></svg>
+        <div style="color:#E86235;font-weight:600;margin-top:8px;">Partial Outage</div>
+      </div>
+      <div style="text-align:center;">
+        <svg width="64" height="64" viewBox="0 0 28 28"><g transform="translate(14,14)"><line x1="0" y1="0" x2="0" y2="-12" stroke="#E04343" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="6" y2="-8" stroke="#E04343" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="10" y2="-5" stroke="#E04343" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="11" y2="1.5" stroke="#E04343" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="8" y2="7" stroke="#E04343" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="4" y2="11" stroke="#E04343" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-2" y2="10" stroke="#E04343" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-7" y2="8" stroke="#E04343" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-11" y2="3" stroke="#E04343" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-10" y2="-4" stroke="#E04343" stroke-width="2.4" stroke-linecap="round"/><line x1="0" y1="0" x2="-6" y2="-9" stroke="#E04343" stroke-width="2.4" stroke-linecap="round"/></g></svg>
+        <div style="color:#E04343;font-weight:600;margin-top:8px;">Major Outage</div>
+      </div>
+    </div>
+    <div style="color:#888;font-size:14px;margin-top:40px;">Icon color changes automatically as status changes</div>
+  </div>
+</div>
+
+</body>
+</html>
