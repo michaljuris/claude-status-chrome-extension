@@ -105,12 +105,13 @@ function renderStatusBar(days) {
     const tooltip = document.createElement('div');
     tooltip.className = 'day-tooltip';
     const dateLabel = formatDate(day.date);
-    if (day.incidents.length > 0) {
-      tooltip.textContent = day.incidents.length === 1
-        ? `${dateLabel}: ${day.incidents[0]}`
-        : `${dateLabel}: ${day.incidents.length} incidents`;
+    if (day.status !== 'operational' && day.outageSeconds > 0) {
+      const outageLabel = day.status === 'major_outage' ? 'Major outage' : 'Partial outage';
+      tooltip.textContent = `${dateLabel}: ${outageLabel} — ${formatDuration(day.outageSeconds)}`;
+    } else if (day.incidents.length > 0) {
+      tooltip.textContent = `${dateLabel}: ${day.incidents[0]}`;
     } else {
-      tooltip.textContent = `${dateLabel}: No incidents`;
+      tooltip.textContent = `${dateLabel}: No downtime`;
     }
     el.appendChild(tooltip);
     bar.appendChild(el);
@@ -194,6 +195,15 @@ function renderIncidents(incidents) {
     el.appendChild(meta);
     section.appendChild(el);
   }
+}
+
+function formatDuration(seconds) {
+  if (seconds < 60) return '< 1 min';
+  const mins = Math.round(seconds / 60);
+  if (mins < 60) return `${mins} mins`;
+  const hrs = Math.floor(mins / 60);
+  const remMins = mins % 60;
+  return remMins > 0 ? `${hrs} hrs ${remMins} mins` : `${hrs} hrs`;
 }
 
 function capitalize(str) {

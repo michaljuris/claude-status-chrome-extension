@@ -124,7 +124,7 @@ function buildSevenDayHistory(allIncidents, currentStatus) {
     const date = new Date(now);
     date.setUTCDate(date.getUTCDate() - i);
     const dateStr = date.toISOString().slice(0, 10); // YYYY-MM-DD
-    days.push({ date: dateStr, status: 'operational', incidents: [] });
+    days.push({ date: dateStr, status: 'operational', incidents: [], outageSeconds: 0 });
   }
 
   for (const incident of allIncidents) {
@@ -137,12 +137,22 @@ function buildSevenDayHistory(allIncidents, currentStatus) {
       ? new Date(incident.resolved_at).toISOString().slice(0, 10)
       : now.toISOString().slice(0, 10);
 
+    const incStart = new Date(incident.started_at).getTime();
+    const incEnd = incident.resolved_at
+      ? new Date(incident.resolved_at).getTime()
+      : now.getTime();
+
     for (const dayEntry of days) {
       if (dayEntry.date >= startDate && dayEntry.date <= endDate) {
         dayEntry.incidents.push(incident.name);
         if (STATUS_SEVERITY[worstStatus] > STATUS_SEVERITY[dayEntry.status]) {
           dayEntry.status = worstStatus;
         }
+
+        const dayStart = new Date(dayEntry.date + 'T00:00:00Z').getTime();
+        const dayEnd = new Date(dayEntry.date + 'T23:59:59.999Z').getTime();
+        const overlapMs = Math.max(0, Math.min(dayEnd, incEnd) - Math.max(dayStart, incStart));
+        dayEntry.outageSeconds += Math.round(overlapMs / 1000);
       }
     }
   }
