@@ -95,7 +95,7 @@ async function pollStatus() {
       .filter((c) => c.id !== CLAUDE_CODE_ID && c.showcase && !c.group)
       .map((c) => ({ id: c.id, name: c.name, status: c.status }));
 
-    const sevenDayHistory = buildSevenDayHistory(incidents.incidents || []);
+    const sevenDayHistory = buildSevenDayHistory(incidents.incidents || [], currentStatus);
 
     const recentIncidents = getRecentIncidents(incidents.incidents || []);
 
@@ -115,8 +115,9 @@ async function pollStatus() {
   }
 }
 
-function buildSevenDayHistory(allIncidents) {
+function buildSevenDayHistory(allIncidents, currentStatus) {
   const now = new Date();
+  const todayStr = now.toISOString().slice(0, 10);
   const days = [];
 
   for (let i = 6; i >= 0; i--) {
@@ -144,6 +145,12 @@ function buildSevenDayHistory(allIncidents) {
         }
       }
     }
+  }
+
+  // Today's bar reflects the current live status, not worst historical
+  const todayEntry = days.find((d) => d.date === todayStr);
+  if (todayEntry) {
+    todayEntry.status = currentStatus;
   }
 
   return days;
