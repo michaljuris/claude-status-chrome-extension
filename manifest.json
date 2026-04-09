@@ -5,8 +5,7 @@
   "version": "1.0.0",
   "permissions": [
     "alarms",
-    "storage",
-    "offscreen"
+    "storage"
   ],
   "host_permissions": [
     "https://status.claude.com/*"
