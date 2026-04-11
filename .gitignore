@@ -2,3 +2,4 @@
 *.crx
 *.pem
 .vscode/settings.json
+.playwright-cli

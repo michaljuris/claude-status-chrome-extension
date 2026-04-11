@@ -345,9 +345,17 @@ body {
 .footer {
   padding: 10px 18px;
   border-top: 1px solid var(--border);
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   animation: fadeIn 0.3s ease-out both;
   animation-delay: 0.16s;
+}
+
+.footer-updated {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .footer a {

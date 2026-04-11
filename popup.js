@@ -44,12 +44,13 @@ const SPARK_RAYS = [
 
 document.addEventListener('DOMContentLoaded', () => {
   chrome.storage.local.get(
-    ['currentStatus', 'otherServices', 'sevenDayHistory', 'recentIncidents'],
+    ['currentStatus', 'otherServices', 'sevenDayHistory', 'recentIncidents', 'lastUpdated'],
     (data) => {
       renderHeader(data.currentStatus || 'operational');
       renderStatusBar(data.sevenDayHistory || []);
       renderServices(data.otherServices || []);
       renderIncidents(data.recentIncidents || []);
+      renderLastUpdated(data.lastUpdated);
     }
   );
 });
@@ -271,4 +272,13 @@ function formatDuration(seconds) {
 
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function renderLastUpdated(timestamp) {
+  const el = document.getElementById('footer-updated');
+  if (!timestamp) return;
+
+  const date = new Date(timestamp);
+  const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  el.textContent = `Updated ${time}`;
 }
