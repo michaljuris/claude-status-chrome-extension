@@ -12,10 +12,10 @@ const STATUS_COLORS_DARK = {
   major_outage: '#E04343',
 };
 
-// Exact colors from status.claude.com bar segments
+// Exact colors from status.claude.com bar segments (4 distinct colors)
 const BAR_COLORS = {
   operational: '#76AD2A',
-  degraded_performance: '#E86235',
+  degraded_performance: '#D4A017',
   partial_outage: '#E86235',
   major_outage: '#E04343',
 };
@@ -87,7 +87,8 @@ function renderHeader(status) {
   }
 
   const headerStatus = document.getElementById('header-status');
-  headerStatus.textContent = `● ${label}`;
+  headerStatus.textContent = label;
+  headerStatus.style.backgroundColor = color + '1F';
   headerStatus.style.color = color;
 }
 
@@ -97,28 +98,79 @@ function renderStatusBar(days) {
 
   if (days.length === 0) return;
 
-  for (const day of days) {
+  days.forEach((day, index) => {
     const el = document.createElement('div');
     el.className = 'status-bar-day';
-    el.style.backgroundColor = BAR_COLORS[day.status] || BAR_COLORS.operational;
+    el.style.animationDelay = `${index * 0.02}s`;
+    el.style.backgroundColor = day.barColor || BAR_COLORS[day.status] || BAR_COLORS.operational;
 
-    const tooltip = document.createElement('div');
-    tooltip.className = 'day-tooltip';
-    const dateLabel = formatDate(day.date);
-    if (day.status !== 'operational' && day.outageSeconds > 0) {
-      const outageLabel = day.status === 'major_outage' ? 'Major outage' : 'Partial outage';
-      tooltip.textContent = `${dateLabel}: ${outageLabel} — ${formatDuration(day.outageSeconds)}`;
-    } else if (day.incidents.length > 0) {
-      tooltip.textContent = `${dateLabel}: ${day.incidents[0]}`;
-    } else {
-      tooltip.textContent = `${dateLabel}: No downtime`;
-    }
-    el.appendChild(tooltip);
+    el.appendChild(buildTooltip(day));
     bar.appendChild(el);
-  }
+  });
 
   document.getElementById('bar-label-start').textContent = formatDate(days[0].date);
   document.getElementById('bar-label-end').textContent = formatDate(days[days.length - 1].date);
+}
+
+function buildTooltip(day) {
+  const tooltip = document.createElement('div');
+  tooltip.className = 'day-tooltip';
+
+  const dateEl = document.createElement('div');
+  dateEl.className = 'tooltip-date';
+  dateEl.textContent = formatDateFull(day.date);
+  tooltip.appendChild(dateEl);
+
+  if (day.status !== 'operational' && day.outageSeconds > 0) {
+    const outageEl = document.createElement('div');
+    outageEl.className = 'tooltip-outage';
+
+    const dot = document.createElement('span');
+    dot.className = 'tooltip-dot';
+    dot.style.backgroundColor = day.barColor || BAR_COLORS[day.status] || BAR_COLORS.operational;
+    outageEl.appendChild(dot);
+
+    const label = document.createElement('span');
+    label.className = 'tooltip-outage-label';
+    label.textContent = STATUS_LABELS[day.status] || day.status;
+    outageEl.appendChild(label);
+
+    const dur = document.createElement('span');
+    dur.className = 'tooltip-duration';
+    dur.textContent = formatDuration(day.outageSeconds);
+    outageEl.appendChild(dur);
+
+    tooltip.appendChild(outageEl);
+  }
+
+  if (day.incidents && day.incidents.length > 0) {
+    const relLabel = document.createElement('div');
+    relLabel.className = 'tooltip-related-label';
+    relLabel.textContent = 'Related';
+    tooltip.appendChild(relLabel);
+
+    const unique = [...new Set(day.incidents)];
+    for (const name of unique) {
+      const inc = document.createElement('div');
+      inc.className = 'tooltip-incident';
+      inc.textContent = name;
+      tooltip.appendChild(inc);
+    }
+  }
+
+  if (!day.outageSeconds || day.outageSeconds === 0) {
+    const ok = document.createElement('div');
+    ok.className = 'tooltip-ok';
+    ok.textContent = 'No downtime';
+    tooltip.appendChild(ok);
+  }
+
+  return tooltip;
+}
+
+function formatDateFull(dateStr) {
+  const date = new Date(dateStr + 'T00:00:00Z');
+  return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
 function formatDate(dateStr) {
@@ -130,6 +182,13 @@ function renderServices(services) {
   const section = document.getElementById('services-section');
   section.innerHTML = '';
 
+  if (services.length === 0) return;
+
+  const label = document.createElement('div');
+  label.className = 'section-label';
+  label.textContent = 'All services';
+  section.appendChild(label);
+
   for (const service of services) {
     const row = document.createElement('div');
     row.className = 'service-row';
@@ -138,10 +197,9 @@ function renderServices(services) {
     name.className = 'service-name';
     name.textContent = service.name;
 
-    const dot = document.createElement('span');
+    const dot = document.createElement('div');
     dot.className = 'service-dot';
-    dot.textContent = '●';
-    dot.style.color = getStatusColor(service.status);
+    dot.style.backgroundColor = getStatusColor(service.status);
 
     row.appendChild(name);
     row.appendChild(dot);
@@ -153,10 +211,15 @@ function renderIncidents(incidents) {
   const section = document.getElementById('incidents-section');
   section.innerHTML = '';
 
+  const label = document.createElement('div');
+  label.className = 'section-label';
+  label.textContent = 'Recent incidents';
+  section.appendChild(label);
+
   if (incidents.length === 0) {
     const el = document.createElement('div');
     el.className = 'no-incidents';
-    el.textContent = 'No recent incidents';
+    el.textContent = 'No incidents in the last 7 days';
     section.appendChild(el);
     return;
   }

@@ -1,121 +1,281 @@
 :root {
-  --bg: #ffffff;
-  --text: #1a1a1a;
-  --text-secondary: #666666;
-  --text-muted: #999999;
-  --border: #eeeeee;
-  --link: #6366f1;
+  --bg: #FAF9F7;
+  --text: #1C1917;
+  --text-secondary: #57534E;
+  --text-muted: #A8A29E;
+  --border: #E7E5E4;
+  --surface-hover: rgba(120, 113, 108, 0.07);
+  --link: #78716C;
+
   --status-green: #76AD2A;
   --status-yellow: #D4A017;
   --status-orange: #E86235;
   --status-red: #E04343;
+
+  --bar-depth: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  --card-bg: rgba(120, 113, 108, 0.05);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1c1c1c;
-    --text: #e0e0e0;
-    --text-secondary: #999999;
-    --text-muted: #666666;
-    --border: #2a2a2a;
-    --link: #818cf8;
-    --status-green: #76AD2A;
-    --status-yellow: #D4A017;
-    --status-orange: #E86235;
-    --status-red: #E04343;
+    --bg: #1C1917;
+    --text: #E7E5E4;
+    --text-secondary: #A8A29E;
+    --text-muted: #78716C;
+    --border: #302D2A;
+    --surface-hover: rgba(231, 229, 228, 0.07);
+    --link: #A8A29E;
+
+    --bar-depth: inset 0 1px 3px rgba(0, 0, 0, 0.25);
+    --card-bg: rgba(231, 229, 228, 0.05);
   }
 }
 
+/* Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes barGrow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+/* Base */
 body {
   width: 340px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   font-size: 13px;
   background: var(--bg);
   color: var(--text);
+  -webkit-font-smoothing: antialiased;
 }
 
+/* Header */
 .header {
-  padding: 14px 16px 10px;
+  padding: 16px 18px 14px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   border-bottom: 1px solid var(--border);
+  animation: fadeIn 0.3s ease-out both;
 }
 
 .header-title {
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 650;
+  font-size: 14.5px;
+  letter-spacing: -0.01em;
 }
 
 .header-status {
   margin-left: auto;
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 100px;
+  letter-spacing: 0.01em;
 }
 
+/* Status Bar */
 .status-bar-section {
-  padding: 12px 16px;
+  padding: 14px 18px 12px;
+  position: relative;
+  z-index: 5;
+  animation: fadeIn 0.3s ease-out both;
+  animation-delay: 0.04s;
+}
+
+.section-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
 }
 
 .status-bar {
   display: flex;
-  gap: 2px;
-  height: 20px;
+  gap: 2.5px;
+  height: 24px;
 }
 
 .status-bar-day {
   flex: 1;
-  border-radius: 2px;
+  border-radius: 3px;
   position: relative;
   cursor: default;
+  box-shadow: var(--bar-depth);
+  transform-origin: bottom;
+  animation: barGrow 0.2s ease-out both;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.status-bar-day:hover {
+  transform: scaleY(1.15);
+  filter: brightness(1.1);
+  z-index: 2;
 }
 
 .status-bar-labels {
   display: flex;
   justify-content: space-between;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .status-bar-label {
   font-size: 10px;
   color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
+/* Tooltips — positioned below bar to avoid popup clipping */
 .day-tooltip {
   display: none;
   position: absolute;
-  bottom: calc(100% + 6px);
+  top: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
   background: var(--text);
   color: var(--bg);
   font-size: 11px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  white-space: nowrap;
+  padding: 8px 10px;
+  border-radius: 8px;
+  width: max-content;
+  max-width: 240px;
   z-index: 10;
   pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.day-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-bottom-color: var(--text);
 }
 
 .status-bar-day:hover .day-tooltip {
   display: block;
 }
 
+/* Edge tooltip positioning to prevent overflow */
+.status-bar-day:first-child .day-tooltip,
+.status-bar-day:nth-child(2) .day-tooltip {
+  left: 0;
+  transform: none;
+}
+.status-bar-day:first-child .day-tooltip::after {
+  left: 18px;
+  transform: none;
+}
+.status-bar-day:nth-child(2) .day-tooltip::after {
+  left: 18px;
+  transform: none;
+}
+
+.status-bar-day:last-child .day-tooltip,
+.status-bar-day:nth-last-child(2) .day-tooltip {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+.status-bar-day:last-child .day-tooltip::after {
+  left: auto;
+  right: 18px;
+  transform: none;
+}
+.status-bar-day:nth-last-child(2) .day-tooltip::after {
+  left: auto;
+  right: 18px;
+  transform: none;
+}
+
+/* Rich tooltip content */
+.tooltip-date {
+  font-weight: 600;
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.tooltip-outage {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0 2px;
+}
+
+.tooltip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tooltip-outage-label {
+  flex: 1;
+}
+
+.tooltip-duration {
+  opacity: 0.7;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
+.tooltip-related-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.45;
+  margin-top: 6px;
+  margin-bottom: 2px;
+}
+
+.tooltip-incident {
+  font-size: 11px;
+  line-height: 1.4;
+  opacity: 0.8;
+}
+
+.tooltip-ok {
+  opacity: 0.5;
+  padding-top: 2px;
+}
+
+/* Services */
 .services-section {
-  padding: 8px 16px 10px;
+  padding: 10px 18px 12px;
   border-top: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
+  animation: fadeIn 0.3s ease-out both;
+  animation-delay: 0.08s;
 }
 
 .service-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 3px 0;
+  padding: 5px 6px;
+  margin: 0 -6px;
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+}
+
+.service-row:hover {
+  background-color: var(--surface-hover);
 }
 
 .service-name {
@@ -124,73 +284,79 @@ body {
 }
 
 .service-dot {
-  font-size: 11px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
+/* Incidents */
 .incidents-section {
-  padding: 8px 16px 12px;
+  padding: 10px 18px 14px;
   border-top: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
+  animation: fadeIn 0.3s ease-out both;
+  animation-delay: 0.12s;
 }
 
 .incident {
-  padding: 4px 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--card-bg);
 }
 
 .incident + .incident {
   margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px solid var(--border);
 }
 
 .incident-name {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 550;
 }
 
 .incident-meta {
   font-size: 11px;
   color: var(--text-muted);
-  margin-top: 2px;
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
 }
 
 .incident-status {
-  font-size: 11px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
   margin-left: 4px;
 }
 
-.incident-status-investigating {
-  color: var(--status-red);
-}
-
-.incident-status-identified {
-  color: var(--status-orange);
-}
-
-.incident-status-monitoring {
-  color: var(--status-yellow);
-}
-
-.incident-status-resolved {
-  color: var(--text-muted);
-}
+.incident-status-investigating { color: var(--status-red); }
+.incident-status-identified { color: var(--status-orange); }
+.incident-status-monitoring { color: var(--status-yellow); }
+.incident-status-resolved { color: var(--text-muted); }
 
 .no-incidents {
   font-size: 12px;
   color: var(--text-muted);
+  padding: 2px 0;
 }
 
+/* Footer */
 .footer {
-  padding: 8px 16px;
+  padding: 10px 18px;
   border-top: 1px solid var(--border);
   text-align: center;
+  animation: fadeIn 0.3s ease-out both;
+  animation-delay: 0.16s;
 }
 
 .footer a {
   color: var(--link);
   font-size: 11px;
   text-decoration: none;
+  transition: color 0.15s ease;
 }
 
 .footer a:hover {
-  text-decoration: underline;
+  color: var(--text-secondary);
 }

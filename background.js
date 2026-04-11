@@ -27,10 +27,56 @@ const SPARK_RAYS = [
 
 const STATUS_COLORS = {
   operational: '#76AD2A',
-  degraded_performance: '#E86235',
+  degraded_performance: '#D4A017',
   partial_outage: '#E86235',
   major_outage: '#E04343',
 };
+
+// Gradient colors from status.claude.com (window.pageColorData)
+const GRADIENT_GREEN = [0x76, 0xAD, 0x2A];
+const GRADIENT_YELLOW = [0xFA, 0xA7, 0x2A];
+const GRADIENT_ORANGE = [0xE8, 0x62, 0x35];
+const GRADIENT_RED = [0xE0, 0x43, 0x43];
+
+// Gradient stops in weighted seconds (partial*0.3 + major*1.0)
+const YELLOW_THRESHOLD = 1175;
+const ORANGE_THRESHOLD = 2000;
+const RED_THRESHOLD = 3600;
+const GREEN_YELLOW_POWER = 0.4;
+
+// Compute bar color matching status.claude.com's gradient.
+// Inputs: partial outage seconds, major outage seconds for a day.
+// Returns hex color string.
+function getBarColor(partialSeconds, majorSeconds) {
+  if (partialSeconds <= 0 && majorSeconds <= 0) return '#76AD2A';
+
+  const weighted = partialSeconds * 0.3 + majorSeconds * 1.0;
+
+  let r, g, b;
+  if (weighted <= YELLOW_THRESHOLD) {
+    const t = Math.pow(weighted / YELLOW_THRESHOLD, GREEN_YELLOW_POWER);
+    r = GRADIENT_GREEN[0] + (GRADIENT_YELLOW[0] - GRADIENT_GREEN[0]) * t;
+    g = GRADIENT_GREEN[1] + (GRADIENT_YELLOW[1] - GRADIENT_GREEN[1]) * t;
+    b = GRADIENT_GREEN[2] + (GRADIENT_YELLOW[2] - GRADIENT_GREEN[2]) * t;
+  } else if (weighted <= ORANGE_THRESHOLD) {
+    const t = (weighted - YELLOW_THRESHOLD) / (ORANGE_THRESHOLD - YELLOW_THRESHOLD);
+    r = GRADIENT_YELLOW[0] + (GRADIENT_ORANGE[0] - GRADIENT_YELLOW[0]) * t;
+    g = GRADIENT_YELLOW[1] + (GRADIENT_ORANGE[1] - GRADIENT_YELLOW[1]) * t;
+    b = GRADIENT_YELLOW[2] + (GRADIENT_ORANGE[2] - GRADIENT_YELLOW[2]) * t;
+  } else if (weighted <= RED_THRESHOLD) {
+    const t = (weighted - ORANGE_THRESHOLD) / (RED_THRESHOLD - ORANGE_THRESHOLD);
+    r = GRADIENT_ORANGE[0] + (GRADIENT_RED[0] - GRADIENT_ORANGE[0]) * t;
+    g = GRADIENT_ORANGE[1] + (GRADIENT_RED[1] - GRADIENT_ORANGE[1]) * t;
+    b = GRADIENT_ORANGE[2] + (GRADIENT_RED[2] - GRADIENT_ORANGE[2]) * t;
+  } else {
+    return '#E04343';
+  }
+
+  return '#' +
+    Math.round(Math.max(0, Math.min(255, r))).toString(16).padStart(2, '0') +
+    Math.round(Math.max(0, Math.min(255, g))).toString(16).padStart(2, '0') +
+    Math.round(Math.max(0, Math.min(255, b))).toString(16).padStart(2, '0');
+}
 
 async function updateIcon(status) {
   const color = STATUS_COLORS[status] || STATUS_COLORS.operational;
@@ -123,47 +169,167 @@ function buildSevenDayHistory(allIncidents, currentStatus) {
   for (let i = 6; i >= 0; i--) {
     const date = new Date(now);
     date.setUTCDate(date.getUTCDate() - i);
-    const dateStr = date.toISOString().slice(0, 10); // YYYY-MM-DD
-    days.push({ date: dateStr, status: 'operational', incidents: [], outageSeconds: 0 });
+    const dateStr = date.toISOString().slice(0, 10);
+    days.push({ date: dateStr, status: 'operational', incidents: [], outageSeconds: 0, partialSeconds: 0, majorSeconds: 0, rawSegments: [] });
   }
 
   for (const incident of allIncidents) {
-    // Only include incidents where Claude Code's status specifically changed
-    const worstStatus = getWorstStatusFromIncident(incident);
-    if (worstStatus === 'operational') continue;
-
-    const startDate = new Date(incident.started_at).toISOString().slice(0, 10);
-    const endDate = incident.resolved_at
-      ? new Date(incident.resolved_at).toISOString().slice(0, 10)
-      : now.toISOString().slice(0, 10);
+    // Skip incidents that didn't affect Claude Code at all
+    if (getWorstStatusFromIncident(incident) === 'operational') continue;
 
     const incStart = new Date(incident.started_at).getTime();
     const incEnd = incident.resolved_at
       ? new Date(incident.resolved_at).getTime()
       : now.getTime();
 
-    for (const dayEntry of days) {
-      if (dayEntry.date >= startDate && dayEntry.date <= endDate) {
-        dayEntry.incidents.push(incident.name);
-        if (STATUS_SEVERITY[worstStatus] > STATUS_SEVERITY[dayEntry.status]) {
-          dayEntry.status = worstStatus;
-        }
+    // Get actual outage periods from component status transitions
+    // Only partial_outage and major_outage count (not degraded_performance)
+    const outagePeriods = getClaudeCodeOutagePeriods(incident);
 
-        const dayStart = new Date(dayEntry.date + 'T00:00:00Z').getTime();
-        const dayEnd = new Date(dayEntry.date + 'T23:59:59.999Z').getTime();
-        const overlapMs = Math.max(0, Math.min(dayEnd, incEnd) - Math.max(dayStart, incStart));
-        dayEntry.outageSeconds += Math.round(overlapMs / 1000);
+    for (const dayEntry of days) {
+      const dayStart = new Date(dayEntry.date + 'T00:00:00Z').getTime();
+      const dayEnd = new Date(dayEntry.date + 'T23:59:59.999Z').getTime();
+
+      // Add incident to "related" list if it overlaps this day
+      if (incStart <= dayEnd && incEnd >= dayStart) {
+        dayEntry.incidents.push(incident.name);
+      }
+
+      // Add outage periods that overlap with this day
+      for (const period of outagePeriods) {
+        const overlapStart = Math.max(dayStart, period.start);
+        const overlapEnd = Math.min(dayEnd, period.end);
+
+        if (overlapStart < overlapEnd) {
+          if (STATUS_SEVERITY[period.status] > STATUS_SEVERITY[dayEntry.status]) {
+            dayEntry.status = period.status;
+          }
+
+          const dayDuration = dayEnd - dayStart;
+          dayEntry.rawSegments.push({
+            start: (overlapStart - dayStart) / dayDuration,
+            end: (overlapEnd - dayStart) / dayDuration,
+            status: period.status,
+          });
+        }
       }
     }
   }
 
-  // Today's bar reflects the current live status, not worst historical
+  for (const dayEntry of days) {
+    dayEntry.segments = buildDaySegments(dayEntry.rawSegments);
+    delete dayEntry.rawSegments;
+
+    // Calculate partial/major seconds from merged segments
+    dayEntry.partialSeconds = 0;
+    dayEntry.majorSeconds = 0;
+    for (const seg of dayEntry.segments) {
+      if (seg.status === 'partial_outage') {
+        dayEntry.partialSeconds += Math.round(seg.fraction * 86400);
+      } else if (seg.status === 'major_outage') {
+        dayEntry.majorSeconds += Math.round(seg.fraction * 86400);
+      }
+    }
+    dayEntry.outageSeconds = dayEntry.partialSeconds + dayEntry.majorSeconds;
+    dayEntry.barColor = getBarColor(dayEntry.partialSeconds, dayEntry.majorSeconds);
+  }
+
   const todayEntry = days.find((d) => d.date === todayStr);
   if (todayEntry) {
     todayEntry.status = currentStatus;
   }
 
   return days;
+}
+
+// Extract outage periods from component-level status transitions.
+// Only partial_outage and major_outage count as outage (matching status.claude.com).
+function getClaudeCodeOutagePeriods(incident) {
+  const transitions = [];
+  for (const update of (incident.incident_updates || [])) {
+    for (const comp of (update.affected_components || [])) {
+      if (comp.code === CLAUDE_CODE_ID) {
+        transitions.push({
+          time: new Date(update.created_at).getTime(),
+          newStatus: comp.new_status,
+        });
+      }
+    }
+  }
+
+  transitions.sort((a, b) => a.time - b.time);
+
+  const periods = [];
+  let outageStart = null;
+  let outageStatus = null;
+
+  for (const t of transitions) {
+    const isOutage = t.newStatus === 'partial_outage' || t.newStatus === 'major_outage';
+
+    if (isOutage && outageStart === null) {
+      // Entering outage
+      outageStart = t.time;
+      outageStatus = t.newStatus;
+    } else if (isOutage && outageStart !== null) {
+      // Still in outage, track worst severity
+      if (STATUS_SEVERITY[t.newStatus] > STATUS_SEVERITY[outageStatus]) {
+        outageStatus = t.newStatus;
+      }
+    } else if (!isOutage && outageStart !== null) {
+      // Outage ended
+      periods.push({ start: outageStart, end: t.time, status: outageStatus });
+      outageStart = null;
+      outageStatus = null;
+    }
+  }
+
+  // If still in outage, close with incident resolution or now
+  if (outageStart !== null) {
+    const end = incident.resolved_at
+      ? new Date(incident.resolved_at).getTime()
+      : Date.now();
+    periods.push({ start: outageStart, end: end, status: outageStatus });
+  }
+
+  return periods;
+}
+
+function buildDaySegments(rawSegments) {
+  if (rawSegments.length === 0) {
+    return [{ fraction: 1, status: 'operational' }];
+  }
+
+  rawSegments.sort((a, b) => a.start - b.start);
+
+  // Merge overlapping segments using worst status
+  const merged = [];
+  for (const seg of rawSegments) {
+    if (merged.length > 0 && seg.start <= merged[merged.length - 1].end) {
+      const last = merged[merged.length - 1];
+      last.end = Math.max(last.end, seg.end);
+      if (STATUS_SEVERITY[seg.status] > STATUS_SEVERITY[last.status]) {
+        last.status = seg.status;
+      }
+    } else {
+      merged.push({ start: seg.start, end: seg.end, status: seg.status });
+    }
+  }
+
+  // Fill gaps with operational
+  const result = [];
+  let cursor = 0;
+  for (const seg of merged) {
+    if (seg.start > cursor + 0.001) {
+      result.push({ fraction: seg.start - cursor, status: 'operational' });
+    }
+    result.push({ fraction: seg.end - seg.start, status: seg.status });
+    cursor = seg.end;
+  }
+  if (cursor < 0.999) {
+    result.push({ fraction: 1 - cursor, status: 'operational' });
+  }
+
+  return result;
 }
 
 function getWorstStatusFromIncident(incident) {

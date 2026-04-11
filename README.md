@@ -6,13 +6,14 @@ A Chrome extension that shows the live status of Claude Code in your browser too
 
 ## Features
 
-- **Toolbar icon** — a Claude spark icon that changes color based on current Claude Code status (green/orange/red)
+- **Toolbar icon** — a Claude spark icon that changes color based on current Claude Code status (green/yellow/orange/red)
 - **Tooltip** — hover to see the current status at a glance ("Claude Code: Operational")
-- **7-day history bar** — colored bar segments showing daily status, with hover tooltips showing outage type and duration
+- **7-day history bar** — gradient-colored bars matching status.claude.com, with rich tooltips showing outage type, duration, and related incidents
 - **Other services** — compact view of all Claude services (claude.ai, API, platform, Cowork, Government)
-- **Recent incidents** — last 7 days of incidents affecting Claude Code, with color-coded status labels for active incidents
-- **Light/dark theme** — follows your system theme automatically
+- **Recent incidents** — last 7 days of incidents affecting Claude Code, with color-coded status labels
+- **Warm light/dark theme** — follows your system theme automatically
 - **Auto-refresh** — polls status.claude.com every 30 seconds
+- **Accurate outage durations** — uses component-level status transitions (not incident timestamps) to match status.claude.com exactly
 
 ## Install
 
@@ -32,16 +33,29 @@ A Chrome extension that shows the live status of Claude Code in your browser too
 
 The extension polls the [Statuspage.io public API](https://status.claude.com/api/v2/summary.json) for Claude's service status. A background service worker fetches data every 30 seconds using `chrome.alarms`, processes it, and caches results in `chrome.storage.local`. The popup reads cached data on open — no network requests when you click the icon.
 
-### Status colors
+### Outage duration calculation
 
-Colors match [status.claude.com](https://status.claude.com):
+Outage durations are calculated from **component-level status transitions** in the incident API, not from incident start/end timestamps. This matches how status.claude.com computes durations:
 
-| Status | Bar color | Meaning |
-|--------|-----------|---------|
-| Operational | Green (`#76AD2A`) | All systems normal |
-| Degraded Performance | Orange (`#E86235`) | Elevated errors or latency |
-| Partial Outage | Orange (`#E86235`) | Some functionality affected |
-| Major Outage | Red (`#E04343`) | Service significantly impacted |
+- Only `partial_outage` and `major_outage` count as downtime
+- `degraded_performance` does not contribute to outage duration (matches the status page)
+- Overlapping incidents are merged to avoid double-counting
+
+### Bar color gradient
+
+Bar colors use a continuous gradient matching status.claude.com, not fixed color buckets. The algorithm was reverse-engineered from all 90 bars on the status page:
+
+1. Compute weighted downtime: `weighted = partial_seconds * 0.3 + major_seconds * 1.0`
+2. Interpolate through 4 stops from `window.pageColorData`:
+
+| Weighted seconds | Color | Hex |
+|-----------------|-------|-----|
+| 0 | Green | `#76AD2A` |
+| 1175 | Yellow | `#FAA72A` |
+| 2000 | Orange | `#E86235` |
+| 3600+ | Red | `#E04343` |
+
+The green-to-yellow segment uses a power curve (`t^0.4`) for natural color spread at low outage values. Major outage seconds weigh 3.3x more than partial, so even short major outages shift the bar toward red. Validated against 27 non-green bars from the status page with an average color distance of 2.2 RGB units.
 
 ### Permissions
 
@@ -54,13 +68,22 @@ No user data is collected or transmitted. See [Privacy Policy](PRIVACY.md).
 ## Project structure
 
 ```
-├── manifest.json       # Chrome extension manifest (V3)
-├── background.js       # Service worker: polling, data processing, icon rendering
-├── popup.html          # Popup markup
-├── popup.js            # Popup rendering logic
-├── popup.css           # Light/dark theme styles
-└── icons/              # Static fallback icon PNGs
+├── manifest.json         # Chrome extension manifest (V3)
+├── background.js         # Service worker: polling, data processing, icon rendering, gradient calculation
+├── popup.html            # Popup markup
+├── popup.js              # Popup rendering logic
+├── popup.css             # Warm light/dark theme styles
+├── test-bar-color.js     # Tests for bar color gradient (node test-bar-color.js)
+└── icons/                # Static fallback icon PNGs
 ```
+
+## Tests
+
+```bash
+node test-bar-color.js
+```
+
+Validates the gradient color function against all 27 non-green bars scraped from status.claude.com (79 tests covering edge cases, monotonicity, weighting, gradient stops, and per-bar accuracy).
 
 ## License
 
