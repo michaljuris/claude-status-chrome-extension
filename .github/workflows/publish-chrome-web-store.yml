@@ -1,0 +1,76 @@
+name: Publish to Chrome Web Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to publish (e.g. v1.0.1)'
+        required: true
+      publish:
+        description: 'Publish immediately after upload'
+        type: boolean
+        default: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release ZIP
+        uses: robinraju/release-downloader@v1
+        with:
+          tag: ${{ inputs.tag }}
+          fileName: release.zip
+
+      - name: Upload to Chrome Web Store
+        run: |
+          # Get access token
+          TOKEN=$(curl -s -X POST "https://oauth2.googleapis.com/token" \
+            -d "client_id=${{ secrets.CWS_CLIENT_ID }}" \
+            -d "client_secret=${{ secrets.CWS_CLIENT_SECRET }}" \
+            -d "refresh_token=${{ secrets.CWS_REFRESH_TOKEN }}" \
+            -d "grant_type=refresh_token" | jq -r '.access_token')
+
+          if [ "$TOKEN" = "null" ] || [ -z "$TOKEN" ]; then
+            echo "Failed to get access token"
+            exit 1
+          fi
+
+          # Upload ZIP
+          UPLOAD=$(curl -s -X PUT \
+            "https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{ secrets.CWS_EXTENSION_ID }}" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "x-goog-api-version: 2" \
+            -T release.zip)
+
+          echo "$UPLOAD" | jq .
+
+          STATUS=$(echo "$UPLOAD" | jq -r '.uploadState')
+          if [ "$STATUS" != "SUCCESS" ]; then
+            echo "Upload failed: $STATUS"
+            exit 1
+          fi
+
+      - name: Publish extension
+        if: ${{ inputs.publish }}
+        run: |
+          TOKEN=$(curl -s -X POST "https://oauth2.googleapis.com/token" \
+            -d "client_id=${{ secrets.CWS_CLIENT_ID }}" \
+            -d "client_secret=${{ secrets.CWS_CLIENT_SECRET }}" \
+            -d "refresh_token=${{ secrets.CWS_REFRESH_TOKEN }}" \
+            -d "grant_type=refresh_token" | jq -r '.access_token')
+
+          PUBLISH=$(curl -s -X POST \
+            "https://www.googleapis.com/chromewebstore/v1.1/items/${{ secrets.CWS_EXTENSION_ID }}/publish" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "x-goog-api-version: 2" \
+            -H "Content-Length: 0")
+
+          echo "$PUBLISH" | jq .
+
+          STATUS=$(echo "$PUBLISH" | jq -r '.status[0]')
+          if [ "$STATUS" != "OK" ]; then
+            echo "Publish failed: $STATUS"
+            exit 1
+          fi
+
+          echo "Extension published successfully"
