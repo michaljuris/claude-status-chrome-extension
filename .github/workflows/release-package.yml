@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v6
         with:
@@ -36,8 +38,72 @@ jobs:
       - name: List ZIP contents
         run: unzip -l release.zip
 
+      - name: Generate release notes
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          REPO="${GITHUB_REPOSITORY}"
+          if [ -n "$PREV_TAG" ]; then
+            COMMITS=$(git log "${PREV_TAG}..${TAG}" --format="%h %s")
+          else
+            COMMITS=$(git log "${TAG}" --format="%h %s")
+          fi
+
+          declare -A SECTIONS
+          SECTIONS[feat]=""
+          SECTIONS[fix]=""
+          SECTIONS[docs]=""
+          SECTIONS[ci]=""
+          SECTIONS[chore]=""
+          SECTIONS[other]=""
+
+          PATTERN='^([a-z]+)(\([^)]*\))?: (.+)$'
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            hash="${line%% *}"
+            msg="${line#* }"
+            if [[ "$msg" =~ $PATTERN ]]; then
+              type="${BASH_REMATCH[1]}"
+              body="${BASH_REMATCH[3]}"
+              if [ -n "${SECTIONS[$type]+x}" ]; then
+                SECTIONS[$type]+="- ${body} ${hash}"$'\n'
+              else
+                SECTIONS[other]+="- ${msg} ${hash}"$'\n'
+              fi
+            else
+              SECTIONS[other]+="- ${msg} ${hash}"$'\n'
+            fi
+          done <<< "$COMMITS"
+
+          declare -A LABELS
+          LABELS[feat]="Features"
+          LABELS[fix]="Bug Fixes"
+          LABELS[docs]="Documentation"
+          LABELS[ci]="CI/CD"
+          LABELS[chore]="Maintenance"
+          LABELS[other]="Other"
+
+          NOTES=""
+          for key in feat fix docs ci chore other; do
+            if [ -n "${SECTIONS[$key]}" ]; then
+              NOTES+="## ${LABELS[$key]}"$'\n'
+              NOTES+="${SECTIONS[$key]}"$'\n'
+            fi
+          done
+
+          if [ -n "$PREV_TAG" ]; then
+            NOTES+="**Full Changelog**: https://github.com/${REPO}/compare/${PREV_TAG}...${TAG}"$'\n'
+          else
+            NOTES+="**Full Changelog**: https://github.com/${REPO}/commits/${TAG}"$'\n'
+          fi
+
+          echo "$NOTES" > release-notes.md
+          echo "--- Generated release notes ---"
+          cat release-notes.md
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           files: release.zip
-          generate_release_notes: true
+          body_path: release-notes.md
