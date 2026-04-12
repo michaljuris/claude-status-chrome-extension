@@ -45,6 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
   chrome.storage.local.get(
     ['currentStatus', 'otherServices', 'sevenDayHistory', 'recentIncidents', 'lastUpdated'],
     (data) => {
+      if (!data.lastUpdated) {
+        renderHeader('loading');
+        document.getElementById('footer-updated').textContent = 'Checking status…';
+        return;
+      }
       renderHeader(data.currentStatus || 'operational');
       renderStatusBar(data.sevenDayHistory || []);
       renderServices(data.otherServices || []);
@@ -64,8 +69,9 @@ function getStatusColor(status) {
 }
 
 function renderHeader(status) {
-  const color = getStatusColor(status);
-  const label = STATUS_LABELS[status] || status;
+  const isLoading = status === 'loading';
+  const color = isLoading ? '#78716C' : getStatusColor(status);
+  const label = isLoading ? 'Checking…' : (STATUS_LABELS[status] || status);
 
   // Draw spark SVG
   const svg = document.getElementById('header-spark');
@@ -301,6 +307,14 @@ function renderLastUpdated(timestamp) {
   if (!timestamp) return;
 
   const date = new Date(timestamp);
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
   const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  el.textContent = `Updated ${time}`;
+
+  if (isToday) {
+    el.textContent = `Updated ${time}`;
+  } else {
+    const day = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    el.textContent = `Updated ${day}, ${time}`;
+  }
 }
