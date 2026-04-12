@@ -114,17 +114,21 @@ function renderSparkIcon(size, color) {
     ctx.stroke();
   }
 
+  function traceEkgPath() {
+    ctx.beginPath();
+    for (let i = 0; i < EKG_POINTS.length; i++) {
+      const x = EKG_POINTS[i][0] * size;
+      const y = EKG_POINTS[i][1] * size;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+  }
+
   // 2. Knockout gap — erase along EKG path
   ctx.globalCompositeOperation = 'destination-out';
   ctx.lineWidth = 4.0 * scale;
   ctx.lineJoin = 'round';
-  ctx.beginPath();
-  for (let i = 0; i < EKG_POINTS.length; i++) {
-    const x = EKG_POINTS[i][0] * size;
-    const y = EKG_POINTS[i][1] * size;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
+  traceEkgPath();
   ctx.stroke();
 
   // 3. Draw EKG pulse on top
@@ -132,18 +136,14 @@ function renderSparkIcon(size, color) {
   ctx.strokeStyle = color;
   ctx.globalAlpha = 0.5;
   ctx.lineWidth = 1.8 * scale;
-  ctx.beginPath();
-  for (let i = 0; i < EKG_POINTS.length; i++) {
-    const x = EKG_POINTS[i][0] * size;
-    const y = EKG_POINTS[i][1] * size;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
+  traceEkgPath();
   ctx.stroke();
   ctx.globalAlpha = 1.0;
 
   return ctx.getImageData(0, 0, size, size);
 }
+
+let lastPayloadHash = '';
 
 async function pollStatus() {
   try {
@@ -172,17 +172,16 @@ async function pollStatus() {
 
     const recentIncidents = getRecentIncidents(incidents.incidents || []);
 
-    await chrome.storage.local.set({
-      currentStatus,
-      otherServices,
-      sevenDayHistory,
-      recentIncidents,
-      lastUpdated: Date.now(),
-    });
+    const payload = { currentStatus, otherServices, sevenDayHistory, recentIncidents };
+    const payloadHash = JSON.stringify(payload);
 
-    await updateIcon(currentStatus);
-    const statusText = formatStatus(currentStatus);
-    chrome.action.setTitle({ title: `Claude Code: ${statusText}` });
+    if (payloadHash !== lastPayloadHash) {
+      lastPayloadHash = payloadHash;
+      await chrome.storage.local.set({ ...payload, lastUpdated: Date.now() });
+      await updateIcon(currentStatus);
+      const statusText = formatStatus(currentStatus);
+      chrome.action.setTitle({ title: `Claude Code: ${statusText}` });
+    }
   } catch (err) {
     console.error('Poll failed:', err);
   }

@@ -1,19 +1,4 @@
-const STATUS_COLORS_LIGHT = {
-  operational: '#76AD2A',
-  degraded_performance: '#D4A017',
-  partial_outage: '#E86235',
-  major_outage: '#E04343',
-};
-
-const STATUS_COLORS_DARK = {
-  operational: '#76AD2A',
-  degraded_performance: '#D4A017',
-  partial_outage: '#E86235',
-  major_outage: '#E04343',
-};
-
-// Exact colors from status.claude.com bar segments (4 distinct colors)
-const BAR_COLORS = {
+const STATUS_COLORS = {
   operational: '#76AD2A',
   degraded_performance: '#D4A017',
   partial_outage: '#E86235',
@@ -64,8 +49,7 @@ function isDarkMode() {
 }
 
 function getStatusColor(status) {
-  const colors = isDarkMode() ? STATUS_COLORS_DARK : STATUS_COLORS_LIGHT;
-  return colors[status] || colors.operational;
+  return STATUS_COLORS[status] || STATUS_COLORS.operational;
 }
 
 function renderHeader(status) {
@@ -131,7 +115,7 @@ function renderStatusBar(days) {
     const el = document.createElement('div');
     el.className = 'status-bar-day';
     el.style.animationDelay = `${index * 0.02}s`;
-    el.style.backgroundColor = day.barColor || BAR_COLORS[day.status] || BAR_COLORS.operational;
+    el.style.backgroundColor = day.barColor || STATUS_COLORS[day.status] || STATUS_COLORS.operational;
 
     el.appendChild(buildTooltip(day));
     bar.appendChild(el);
@@ -156,7 +140,7 @@ function buildTooltip(day) {
 
     const dot = document.createElement('span');
     dot.className = 'tooltip-dot';
-    dot.style.backgroundColor = day.barColor || BAR_COLORS[day.status] || BAR_COLORS.operational;
+    dot.style.backgroundColor = day.barColor || STATUS_COLORS[day.status] || STATUS_COLORS.operational;
     outageEl.appendChild(dot);
 
     const label = document.createElement('span');
