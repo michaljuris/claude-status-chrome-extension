@@ -28,18 +28,17 @@ const STATUS_LABELS = {
 };
 
 // Keep in sync with background.js
-const SPARK_RAYS = [
-  { angle: -90, length: 1.0 },
-  { angle: -53, length: 0.72 },
-  { angle: -27, length: 0.87 },
-  { angle: 5, length: 0.92 },
-  { angle: 35, length: 0.7 },
-  { angle: 63, length: 0.9 },
-  { angle: 97, length: 0.83 },
-  { angle: 127, length: 0.73 },
-  { angle: 160, length: 0.88 },
-  { angle: -160, length: 0.8 },
-  { angle: -120, length: 0.76 },
+const SPARK_RAYS = (() => {
+  const step = 360 / 11;
+  const lengths = [1.0, 0.88, 1.0, 0.88, 1.0, 0.88, 1.0, 0.88, 1.0, 0.88, 1.0];
+  return lengths.map((len, i) => ({ angle: -90 + i * step, length: len }));
+})();
+
+// EKG path in 28x28 viewBox coordinates
+const EKG_POINTS = [
+  [2, 14], [7, 14], [8.5, 12.8], [10, 14], [11.5, 14],
+  [12.5, 8], [15, 18], [17, 14], [19, 14],
+  [20.5, 12.5], [22.5, 14], [26, 14],
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -82,10 +81,33 @@ function renderHeader(status) {
     line.setAttribute('x2', cx + Math.cos(rad) * len);
     line.setAttribute('y2', cy + Math.sin(rad) * len);
     line.setAttribute('stroke', color);
-    line.setAttribute('stroke-width', '2.8');
+    line.setAttribute('stroke-width', '2.6');
     line.setAttribute('stroke-linecap', 'round');
     svg.appendChild(line);
   }
+
+  // EKG knockout gap + pulse
+  const ekgD = EKG_POINTS.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0]},${p[1]}`).join(' ');
+  const bgColor = isDarkMode() ? '#1C1917' : '#FAF9F7';
+
+  const gap = document.createElementNS(ns, 'path');
+  gap.setAttribute('d', ekgD);
+  gap.setAttribute('fill', 'none');
+  gap.setAttribute('stroke', bgColor);
+  gap.setAttribute('stroke-width', '4');
+  gap.setAttribute('stroke-linecap', 'round');
+  gap.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(gap);
+
+  const pulse = document.createElementNS(ns, 'path');
+  pulse.setAttribute('d', ekgD);
+  pulse.setAttribute('fill', 'none');
+  pulse.setAttribute('stroke', color);
+  pulse.setAttribute('stroke-width', '1.8');
+  pulse.setAttribute('stroke-linecap', 'round');
+  pulse.setAttribute('stroke-linejoin', 'round');
+  pulse.setAttribute('opacity', '0.5');
+  svg.appendChild(pulse);
 
   const headerStatus = document.getElementById('header-status');
   headerStatus.textContent = label;

@@ -9,20 +9,19 @@ const STATUS_SEVERITY = {
   major_outage: 3,
 };
 
-// Organic spark rays — angles and relative lengths (0-1 scale)
-// Keep in sync with popup.js
-const SPARK_RAYS = [
-  { angle: -90, length: 1.0 },
-  { angle: -53, length: 0.72 },
-  { angle: -27, length: 0.87 },
-  { angle: 5, length: 0.92 },
-  { angle: 35, length: 0.7 },
-  { angle: 63, length: 0.9 },
-  { angle: 97, length: 0.83 },
-  { angle: 127, length: 0.73 },
-  { angle: 160, length: 0.88 },
-  { angle: -160, length: 0.8 },
-  { angle: -120, length: 0.76 },
+// 11 rays at even 32.7° intervals, alternating lengths — Keep in sync with popup.js
+const SPARK_RAYS = (() => {
+  const step = 360 / 11;
+  const lengths = [1.0, 0.88, 1.0, 0.88, 1.0, 0.88, 1.0, 0.88, 1.0, 0.88, 1.0];
+  return lengths.map((len, i) => ({ angle: -90 + i * step, length: len }));
+})();
+
+// EKG heartbeat path points (normalized to 0-1 range, centered at 0.5)
+const EKG_POINTS = [
+  [0.071, 0.5], [0.25, 0.5], [0.304, 0.457],
+  [0.357, 0.5], [0.411, 0.5], [0.446, 0.286],
+  [0.536, 0.643], [0.607, 0.5], [0.679, 0.5],
+  [0.732, 0.446], [0.804, 0.5], [0.929, 0.5],
 ];
 
 const STATUS_COLORS = {
@@ -96,24 +95,52 @@ function renderSparkIcon(size, color) {
 
   const cx = size / 2;
   const cy = size / 2;
-  const maxRadius = size * 0.45;
-  const lineWidth = Math.max(1.5, size * 0.08);
+  const maxRadius = size * 0.48;
+  const rayWidth = Math.max(2.2, size * 0.09);
+  const scale = size / 28; // EKG points are normalized to 28x28 viewBox
 
+  // 1. Draw rays
   ctx.strokeStyle = color;
-  ctx.lineWidth = lineWidth;
+  ctx.lineWidth = rayWidth;
   ctx.lineCap = 'round';
 
   for (const ray of SPARK_RAYS) {
     const radians = (ray.angle * Math.PI) / 180;
     const len = maxRadius * ray.length;
-    const x = cx + Math.cos(radians) * len;
-    const y = cy + Math.sin(radians) * len;
 
     ctx.beginPath();
     ctx.moveTo(cx, cy);
-    ctx.lineTo(x, y);
+    ctx.lineTo(cx + Math.cos(radians) * len, cy + Math.sin(radians) * len);
     ctx.stroke();
   }
+
+  // 2. Knockout gap — erase along EKG path
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.lineWidth = 4.0 * scale;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  for (let i = 0; i < EKG_POINTS.length; i++) {
+    const x = EKG_POINTS[i][0] * size;
+    const y = EKG_POINTS[i][1] * size;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // 3. Draw EKG pulse on top
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.strokeStyle = color;
+  ctx.globalAlpha = 0.5;
+  ctx.lineWidth = 1.8 * scale;
+  ctx.beginPath();
+  for (let i = 0; i < EKG_POINTS.length; i++) {
+    const x = EKG_POINTS[i][0] * size;
+    const y = EKG_POINTS[i][1] * size;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.globalAlpha = 1.0;
 
   return ctx.getImageData(0, 0, size, size);
 }

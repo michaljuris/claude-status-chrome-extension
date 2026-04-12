@@ -7,11 +7,12 @@ DETAILED DESCRIPTION:
 
 Keep an eye on Claude Code's health without leaving your browser.
 
-This extension puts a live status indicator in your Chrome toolbar — a colored spark icon that turns green, orange, or red based on Claude Code's current status. Hover to see the status text, click to see the full picture.
+This extension puts a live status indicator in your Chrome toolbar — a colored spark icon that shifts from green through yellow, orange, to red based on Claude Code's current status. Hover to see the status text, click to see the full picture.
 
 WHAT YOU GET:
 - Live status icon in the toolbar that updates every 30 seconds
-- 7-day history bar showing daily uptime with outage durations on hover
+- 7-day history bar with gradient colors matching status.claude.com — hover to see outage type, duration, and related incidents
+- Accurate outage durations computed from component-level status transitions
 - Current status of all Claude services (claude.ai, API, platform, Cowork, Government)
 - Recent incident summaries with timestamps and resolution status
 - Light and dark theme support (follows your system setting)

@@ -1,4 +1,4 @@
-# Privacy Policy — Claude Code Status Extension
+# Privacy Policy — Status Monitor for Claude Code
 
 **Last updated:** April 9, 2026
 

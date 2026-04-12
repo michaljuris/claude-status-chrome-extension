@@ -3,3 +3,8 @@
 *.pem
 .vscode/settings.json
 .playwright-cli
+
+store-assets/icon-options.html
+
+# Claude Code local settings
+.claude/settings.local.json

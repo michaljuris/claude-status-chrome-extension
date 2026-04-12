@@ -1,8 +1,9 @@
-# Claude Code Status
+# Status Monitor for Claude Code
 
 A Chrome extension that shows the live status of Claude Code in your browser toolbar.
 
-![Claude Code Status Extension](store-assets/screenshot-light.png)
+![Status Monitor for Claude Code](store-assets/screenshot-light.png)
+<!-- Take screenshots: serve project root with `python3 -m http.server` and open store-assets/screenshots.html -->
 
 ## Features
 
