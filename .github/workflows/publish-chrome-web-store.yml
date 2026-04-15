@@ -16,10 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download release ZIP
-        uses: robinraju/release-downloader@v1
-        with:
-          tag: ${{ inputs.tag }}
-          fileName: release.zip
+        run: gh release download "${{ inputs.tag }}" --pattern release.zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
 
       - name: Upload to Chrome Web Store
         run: |
