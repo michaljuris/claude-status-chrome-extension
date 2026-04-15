@@ -261,7 +261,7 @@ function buildSevenDayHistory(allIncidents, currentStatus) {
   }
 
   const todayEntry = days.find((d) => d.date === todayStr);
-  if (todayEntry) {
+  if (todayEntry && STATUS_SEVERITY[currentStatus] > STATUS_SEVERITY[todayEntry.status]) {
     todayEntry.status = currentStatus;
   }
 

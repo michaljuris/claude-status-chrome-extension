@@ -140,7 +140,7 @@ function buildTooltip(day) {
 
     const dot = document.createElement('span');
     dot.className = 'tooltip-dot';
-    dot.style.backgroundColor = day.barColor || STATUS_COLORS[day.status] || STATUS_COLORS.operational;
+    dot.style.backgroundColor = STATUS_COLORS[day.status] || STATUS_COLORS.operational;
     outageEl.appendChild(dot);
 
     const label = document.createElement('span');

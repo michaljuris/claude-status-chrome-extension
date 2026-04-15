@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Status Monitor for Claude Code",
   "description": "Shows Claude Code service status in your browser toolbar. See outages, incidents, and 7-day history at a glance. Unofficial.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "permissions": [
     "alarms",
     "storage"
